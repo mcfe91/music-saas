@@ -1,0 +1,29 @@
+# Go binaries
+/bin/
+/bin/*
+
+# Build artifacts
+/build/
+/*.exe
+/*.out
+
+# Dependency directories
+/vendor/
+# Go modules
+go.sum
+*.test
+
+# IDE/editor specific files
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+*.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables file
+.env
