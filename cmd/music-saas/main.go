@@ -3,6 +3,7 @@ package main
 import (
 	// "database/sql"
 	"log"
+	"music-saas/internal/middleware"
 	"music-saas/pkg/api"
 	"music-saas/pkg/db"
 	"music-saas/pkg/service"
@@ -25,9 +26,15 @@ func main() {
 	authService := service.NewAuthService(userRepo)
 	apiHandler := api.NewAPIHandler(authService)
 
-	http.HandleFunc("/signup", apiHandler.Signup)
-	http.HandleFunc("/login", apiHandler.Login)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/signup", apiHandler.Signup)
+	mux.HandleFunc("/login", apiHandler.Login)
+
+	protectedRoutes := http.NewServeMux()
+	protectedRoutes.HandleFunc("/api/profile", apiHandler.Profile)
+
+	mux.Handle("/api/", middleware.AuthMiddleware(protectedRoutes))
 
 	log.Println("Server starting on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", mux))
 }

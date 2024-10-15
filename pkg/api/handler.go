@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"music-saas/internal/middleware"
 	"music-saas/pkg/service"
 	"net/http"
 )
@@ -68,4 +69,20 @@ func (h *APIHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"token": token})
+}
+
+func (h *APIHandler) Profile(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value(middleware.ContextUserKey).(string)
+	if !ok {
+		http.Error(w, "user not found in context", http.StatusInternalServerError)
+		return
+	}
+
+	userData, err := h.authService.Profile(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(userData)
 }
