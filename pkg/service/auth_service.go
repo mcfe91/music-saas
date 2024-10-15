@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"music-saas/pkg/db"
 	"music-saas/pkg/model"
 	"time"
 
@@ -15,19 +16,32 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func Signup(username, password string) (*model.User, error) {
+type AuthService struct {
+	userRepo db.UserRepository
+}
+
+func NewAuthService(repo db.UserRepository) *AuthService {
+	return &AuthService{userRepo: repo}
+}
+
+func (s *AuthService) Signup(username, password string) (*model.User, error) {
 	user := &model.User{Username: username, Password: password}
 	err := user.HashPassword()
 	if err != nil {
 		return nil, err
 	}
-	// Store in database here
+	err = s.userRepo.CreateUser(user)
+	if err != nil {
+		return nil, err
+	}
 	return user, nil
 }
 
-func Login(username, password string) (string, error) {
-	// Fetch user in database here
-	user := &model.User{Username: username, Password: "$2a$10$vPYge9uhVepnUiuS7LIEMufXs9ukhb56im70K9oNRYKBLxZN7zbyW"}
+func (s *AuthService) Login(username, password string) (string, error) {
+	user, err := s.userRepo.GetUserByUsername(username)
+	if err != nil {
+		return "", err
+	}
 
 	if !user.CheckPassword(password) {
 		return "", errors.New("invalid credentials")
