@@ -1,28 +1,45 @@
 package main
 
 import (
-	// "database/sql"
+	"context"
+	"fmt"
 	"log"
 	"music-saas/internal/middleware"
 	"music-saas/pkg/api"
 	"music-saas/pkg/db"
 	"music-saas/pkg/service"
 	"net/http"
+	"os"
 
+	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	// Uncomment this to use PostgreSQL
-	// connStr := "user=username dbname=mydb sslmode=disable"
-	// db, err := sql.Open("postgres", connStr)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer db.Close()
-	// userRepo := service.NewPostgresUserRepository(db)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	userRepo := db.NewInMemoryUserRepository()
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
+
+	dbConn, err := pgxpool.Connect(context.Background(), connStr)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer dbConn.Close()
+
+	log.Println("Successfully connected to the database")
+
+	// userRepo := db.NewInMemoryUserRepository()
+	userRepo := db.NewPostgresUserRepository(dbConn)
 	authService := service.NewAuthService(userRepo)
 	apiHandler := api.NewAPIHandler(authService)
 
