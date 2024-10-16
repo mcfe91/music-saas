@@ -2,23 +2,22 @@ package api
 
 import (
 	"encoding/json"
-	"music-saas/internal/middleware"
 	"music-saas/pkg/service"
 	"net/http"
 )
 
 // APIHandler holds the AuthService that will be used for handling requests
-type APIHandler struct {
+type AuthAPI struct {
 	authService *service.AuthService
 }
 
 // NewAPIHandler initializes a new APIHandler with the given AuthService
-func NewAPIHandler(authService *service.AuthService) *APIHandler {
-	return &APIHandler{authService: authService}
+func NewAuthAPI(authService *service.AuthService) *AuthAPI {
+	return &AuthAPI{authService: authService}
 }
 
 // Signup handles user signup requests
-func (h *APIHandler) Signup(w http.ResponseWriter, r *http.Request) {
+func (a *AuthAPI) Signup(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -34,7 +33,7 @@ func (h *APIHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newUser, err := h.authService.Signup(user.Username, user.Password)
+	newUser, err := a.authService.Signup(user.Username, user.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -45,7 +44,7 @@ func (h *APIHandler) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login handles user login requests
-func (h *APIHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (a *AuthAPI) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -61,7 +60,7 @@ func (h *APIHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.authService.Login(user.Username, user.Password)
+	token, err := a.authService.Login(user.Username, user.Password)
 	if err != nil {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
@@ -69,20 +68,4 @@ func (h *APIHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"token": token})
-}
-
-func (h *APIHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	user, ok := r.Context().Value(middleware.ContextUserKey).(string)
-	if !ok {
-		http.Error(w, "user not found in context", http.StatusInternalServerError)
-		return
-	}
-
-	userData, err := h.authService.Profile(user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(userData)
 }

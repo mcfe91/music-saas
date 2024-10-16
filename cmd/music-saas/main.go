@@ -41,14 +41,16 @@ func main() {
 	// userRepo := db.NewInMemoryUserRepository()
 	userRepo := db.NewPostgresUserRepository(dbConn)
 	authService := service.NewAuthService(userRepo)
-	apiHandler := api.NewAPIHandler(authService)
+	profileService := service.NewProfileService(userRepo)
+	authAPI := api.NewAuthAPI(authService)
+	profileAPI := api.NewProfileAPI(profileService)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/signup", apiHandler.Signup)
-	mux.HandleFunc("/login", apiHandler.Login)
+	mux.HandleFunc("/signup", authAPI.Signup)
+	mux.HandleFunc("/login", authAPI.Login)
 
 	protectedRoutes := http.NewServeMux()
-	protectedRoutes.HandleFunc("/api/profile", apiHandler.Profile)
+	protectedRoutes.HandleFunc("/api/profile", profileAPI.Profile)
 
 	mux.Handle("/api/", middleware.AuthMiddleware(protectedRoutes))
 
