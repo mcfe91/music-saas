@@ -11,6 +11,7 @@ require github.com/jackc/puddle v1.3.0 // indirect
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gorilla/mux v1.8.1
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.3 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
