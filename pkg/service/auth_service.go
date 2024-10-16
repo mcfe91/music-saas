@@ -64,3 +64,11 @@ func (s *AuthService) Login(username, password string) (string, error) {
 
 	return tokenString, nil
 }
+
+func (s *AuthService) GetUserByUsername(username string) (*model.User, error) {
+	user, err := s.userRepo.GetUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}

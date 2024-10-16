@@ -42,7 +42,6 @@ func main() {
 	log.Println("Successfully connected to the database")
 
 	// Repositories
-	// userRepo := db.NewInMemoryUserRepository()
 	userRepo := db.NewPostgresUserRepository(dbConn)
 	productRepo := db.NewPostgresProductRepository(dbConn)
 
@@ -53,27 +52,30 @@ func main() {
 
 	// API Handlers
 	authAPI := api.NewAuthAPI(authService)
-	profileAPI := api.NewProfileAPI(profileService)
 	productAPI := api.NewProductHandler(productService)
+	profileAPI := api.NewProfileAPI(profileService)
 
 	// Router setup using Gorilla mux
 	r := mux.NewRouter()
 
-	// Authentication routes
+	// Public routes
 	r.HandleFunc("/signup", authAPI.Signup).Methods("POST")
 	r.HandleFunc("/login", authAPI.Login).Methods("POST")
-
-	// Profile route (protected)
-	protectedRoutes := mux.NewRouter()
-	protectedRoutes.HandleFunc("/api/profile", profileAPI.Profile).Methods("GET")
-	r.PathPrefix("/api/").Handler(middleware.AuthMiddleware(protectedRoutes))
-
-	// Product routes
-	r.HandleFunc("/products", productAPI.CreateProduct).Methods("POST")
 	r.HandleFunc("/products/{id}", productAPI.GetProduct).Methods("GET")
-	r.HandleFunc("/products/{id}", productAPI.UpdateProduct).Methods("PUT")
-	r.HandleFunc("/products/{id}", productAPI.DeleteProduct).Methods("DELETE")
 	r.HandleFunc("/products", productAPI.GetProducts).Methods("GET")
+
+	// Protected routes
+	protectedRouter := r.PathPrefix("/api").Subrouter()
+	protectedRouter.Use(middleware.AuthMiddleware(authService))
+	protectedRouter.HandleFunc("/profile", profileAPI.Profile).Methods("GET")
+
+	// Admin routes
+	adminRouter := r.PathPrefix("/api/admin").Subrouter()
+	adminRouter.Use(middleware.AuthMiddleware(authService))
+	adminRouter.Use(middleware.AdminMiddleware)
+	adminRouter.HandleFunc("/products", productAPI.CreateProduct).Methods("POST")
+	adminRouter.HandleFunc("/products/{id}", productAPI.UpdateProduct).Methods("PUT")
+	adminRouter.HandleFunc("/products/{id}", productAPI.DeleteProduct).Methods("DELETE")
 
 	// Start the server
 	log.Println("Server starting on :8080")

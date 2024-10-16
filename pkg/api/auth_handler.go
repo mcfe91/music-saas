@@ -45,7 +45,7 @@ func (a *AuthAPI) Signup(w http.ResponseWriter, r *http.Request) {
 
 // Login handles user login requests
 func (a *AuthAPI) Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}

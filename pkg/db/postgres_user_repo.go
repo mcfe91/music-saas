@@ -25,8 +25,8 @@ func (repo *PostgresUserRepository) CreateUser(user *model.User) error {
 
 func (repo *PostgresUserRepository) GetUserByUsername(username string) (*model.User, error) {
 	user := &model.User{}
-	row := repo.db.QueryRow(context.Background(), "SELECT username, password FROM users WHERE username = $1", username)
-	err := row.Scan(&user.Username, &user.Password)
+	row := repo.db.QueryRow(context.Background(), "SELECT username, password, is_admin FROM users WHERE username = $1", username)
+	err := row.Scan(&user.Username, &user.Password, &user.IsAdmin)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			return nil, errors.New("user not found")
