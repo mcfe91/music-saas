@@ -19,3 +19,19 @@ func (repo *PostgresCartItemRepository) AddCartItem(cartID, productID, quantity 
 		cartID, productID, quantity)
 	return err
 }
+
+func (repo *PostgresCartItemRepository) RemoveCartItem(cartID, productID int) (bool, error) {
+	result, err := repo.db.ExecContext(context.Background(),
+		"DELETE FROM cart_items WHERE cart_id = $1 AND product_id = $2",
+		cartID, productID)
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	return rowsAffected > 0, nil
+}

@@ -78,6 +78,7 @@ func main() {
 	protectedRouter.Use(middleware.AuthMiddleware(authService, jwtKey))
 	protectedRouter.HandleFunc("/profile", profileAPI.GetProfile).Methods("GET")
 	protectedRouter.HandleFunc("/cart", cartAPI.AddToCart).Methods("POST")
+	protectedRouter.HandleFunc("/cart", cartAPI.RemoveFromCart).Methods("DELETE")
 
 	// Admin routes
 	adminRouter := r.PathPrefix("/api/admin").Subrouter()
