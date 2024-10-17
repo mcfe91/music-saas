@@ -14,6 +14,7 @@ var JwtKey = []byte("secret_key")
 
 type Claims struct {
 	Username string `json:"username"`
+	ID       int    `json:"id"`
 	jwt.StandardClaims
 }
 
@@ -50,7 +51,8 @@ func (s *AuthService) Login(username, password string) (string, error) {
 
 	expirationTime := time.Now().Add(60 * time.Minute)
 	claims := &Claims{
-		Username: username,
+		Username: user.Username,
+		ID:       user.ID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
