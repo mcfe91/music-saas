@@ -30,9 +30,6 @@ func (repo *PostgresCartRepository) GetCartByUserID(userID int) (*model.Cart, er
 	row := repo.db.QueryRowContext(context.Background(), "SELECT id, user_id FROM carts WHERE user_id = $1", userID)
 	err := row.Scan(&cart.ID, &cart.UserID)
 	if err != nil {
-		if err.Error() == "no rows in result set" {
-			return nil, nil // Return nil if the cart doesn't exist
-		}
 		return nil, err
 	}
 	return cart, nil

@@ -21,13 +21,18 @@ func (s *CartService) CreateCart(userID int) (*model.Cart, error) {
 
 func (s *CartService) AddToCart(user *model.User, productID, quantity int) error {
 	cart, err := s.GetCartByUserID(user.ID)
-	// TODO: add specific error that cart doesn't exist
 	if err != nil {
+		return err
+	}
+
+	if cart == nil {
+		// If no cart exists, create a new one
 		cart, err = s.CreateCart(user.ID)
 		if err != nil {
-			return err
+			return err // Handle error in cart creation
 		}
 	}
+
 	return s.cartItemRepo.AddCartItem(cart.ID, productID, quantity)
 }
 
