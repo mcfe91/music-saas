@@ -26,13 +26,26 @@ func (s *CartService) AddToCart(user *model.User, productID, quantity int) error
 	}
 
 	if cart == nil {
-		// If no cart exists, create a new one
+		// Create a new cart if none exists
+		// TODO: do we delete cart if downstream fails? transaction?
 		cart, err = s.CreateCart(user.ID)
 		if err != nil {
-			return err // Handle error in cart creation
+			return err
 		}
 	}
 
+	// Check if the cart item already exists
+	existingItem, err := s.cartItemRepo.GetCartItemByProductID(cart.ID, productID)
+	if err != nil {
+		return err
+	}
+
+	if existingItem != nil {
+		// Update the quantity of the existing cart item
+		return s.cartItemRepo.UpdateCartItemQuantity(existingItem.ID, existingItem.Quantity+quantity)
+	}
+
+	// If the item does not exist, create a new cart item
 	return s.cartItemRepo.AddCartItem(cart.ID, productID, quantity)
 }
 
