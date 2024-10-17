@@ -2,21 +2,22 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"errors"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"music-saas/pkg/model"
 )
 
+// TODO: rename symbols to match others
 type PostgresUserRepository struct {
-	db *pgxpool.Pool
+	db *sql.DB
 }
 
-func NewPostgresUserRepository(db *pgxpool.Pool) *PostgresUserRepository {
+func NewPostgresUserRepository(db *sql.DB) *PostgresUserRepository {
 	return &PostgresUserRepository{db: db}
 }
 
 func (repo *PostgresUserRepository) CreateUser(user *model.User) error {
-	_, err := repo.db.Exec(context.Background(), "INSERT INTO users (username, password) VALUES ($1, $2)", user.Username, user.Password)
+	_, err := repo.db.ExecContext(context.Background(), "INSERT INTO users (username, password) VALUES ($1, $2)", user.Username, user.Password)
 	if err != nil {
 		return err
 	}
@@ -25,10 +26,10 @@ func (repo *PostgresUserRepository) CreateUser(user *model.User) error {
 
 func (repo *PostgresUserRepository) GetUserByUsername(username string) (*model.User, error) {
 	user := &model.User{}
-	row := repo.db.QueryRow(context.Background(), "SELECT username, password, is_admin FROM users WHERE username = $1", username)
+	row := repo.db.QueryRowContext(context.Background(), "SELECT username, password, is_admin FROM users WHERE username = $1", username)
 	err := row.Scan(&user.Username, &user.Password, &user.IsAdmin)
 	if err != nil {
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New("user not found")
 		}
 		return nil, err

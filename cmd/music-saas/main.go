@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"music-saas/internal/middleware"
@@ -12,8 +11,10 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
+
+	"database/sql"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -32,14 +33,17 @@ func main() {
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require", dbUser, dbPassword, dbHost, dbPort, dbName)
 
-	// Connect to the database
-	dbConn, err := pgxpool.Connect(context.Background(), connStr)
+	dbConn, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 	defer dbConn.Close()
 
-	log.Println("Successfully connected to the database")
+	// Check the connection
+	err = dbConn.Ping()
+	if err != nil {
+		log.Fatalf("Unable to ping the database: %v\n", err)
+	}
 
 	// Repositories
 	userRepo := db.NewPostgresUserRepository(dbConn)
