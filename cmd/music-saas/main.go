@@ -60,7 +60,7 @@ func main() {
 	// API Handlers
 	authAPI := api.NewAuthAPI(authService)
 	productAPI := api.NewProductHandler(productService)
-	profileAPI := api.NewProfileAPI(profileService)
+	profileAPI := api.NewProfileHandler(profileService)
 	cartAPI := api.NewCartHandler(cartService)
 
 	// Router setup using Gorilla mux
@@ -75,7 +75,7 @@ func main() {
 	// Protected routes
 	protectedRouter := r.PathPrefix("/api").Subrouter()
 	protectedRouter.Use(middleware.AuthMiddleware(authService))
-	protectedRouter.HandleFunc("/profile", profileAPI.Profile).Methods("GET")
+	protectedRouter.HandleFunc("/profile", profileAPI.GetProfile).Methods("GET")
 	protectedRouter.HandleFunc("/cart", cartAPI.AddToCart).Methods("POST")
 
 	// Admin routes

@@ -8,22 +8,22 @@ import (
 	"net/http"
 )
 
-type ProfileAPI struct {
+type ProfileHandler struct {
 	profileService *service.ProfileService
 }
 
-func NewProfileAPI(profileService *service.ProfileService) *ProfileAPI {
-	return &ProfileAPI{profileService: profileService}
+func NewProfileHandler(profileService *service.ProfileService) *ProfileHandler {
+	return &ProfileHandler{profileService: profileService}
 }
 
-func (a *ProfileAPI) Profile(w http.ResponseWriter, r *http.Request) {
+func (h *ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(middleware.ContextUserKey).(*model.User)
 	if !ok {
 		http.Error(w, "user not found in context", http.StatusInternalServerError)
 		return
 	}
 
-	userData, err := a.profileService.Profile(user.Username)
+	userData, err := h.profileService.Profile(user.Username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

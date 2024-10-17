@@ -7,7 +7,11 @@ import (
 	"music-saas/pkg/model"
 )
 
-// TODO: rename symbols to match others
+type UserRepository interface {
+	CreateUser(user *model.User) error
+	GetUserByUsername(username string) (*model.User, error)
+}
+
 type PostgresUserRepository struct {
 	db *sql.DB
 }
