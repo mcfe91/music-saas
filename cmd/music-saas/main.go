@@ -30,6 +30,7 @@ func main() {
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
+	jwtKey := []byte(os.Getenv("JWT_SECRET"))
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require", dbUser, dbPassword, dbHost, dbPort, dbName)
 
@@ -52,7 +53,7 @@ func main() {
 	cartItemRepo := db.NewPostgresCartItemRepository(dbConn)
 
 	// Services
-	authService := service.NewAuthService(userRepo)
+	authService := service.NewAuthService(userRepo, jwtKey)
 	profileService := service.NewProfileService(userRepo)
 	productService := service.NewProductService(productRepo)
 	cartService := service.NewCartService(cartRepo, cartItemRepo)
@@ -74,13 +75,13 @@ func main() {
 
 	// Protected routes
 	protectedRouter := r.PathPrefix("/api").Subrouter()
-	protectedRouter.Use(middleware.AuthMiddleware(authService))
+	protectedRouter.Use(middleware.AuthMiddleware(authService, jwtKey))
 	protectedRouter.HandleFunc("/profile", profileAPI.GetProfile).Methods("GET")
 	protectedRouter.HandleFunc("/cart", cartAPI.AddToCart).Methods("POST")
 
 	// Admin routes
 	adminRouter := r.PathPrefix("/api/admin").Subrouter()
-	adminRouter.Use(middleware.AuthMiddleware(authService))
+	adminRouter.Use(middleware.AuthMiddleware(authService, jwtKey))
 	adminRouter.Use(middleware.AdminMiddleware)
 	adminRouter.HandleFunc("/products", productAPI.CreateProduct).Methods("POST")
 	adminRouter.HandleFunc("/products/{id}", productAPI.UpdateProduct).Methods("PUT")

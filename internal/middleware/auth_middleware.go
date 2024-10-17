@@ -15,7 +15,7 @@ type contextKey string
 
 var ContextUserKey = contextKey("user")
 
-func AuthMiddleware(authService *service.AuthService) mux.MiddlewareFunc {
+func AuthMiddleware(authService *service.AuthService, jwtKey []byte) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
@@ -32,7 +32,7 @@ func AuthMiddleware(authService *service.AuthService) mux.MiddlewareFunc {
 
 			claims := &service.Claims{}
 			token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-				return []byte(service.JwtKey), nil
+				return []byte(jwtKey), nil
 			})
 
 			if err != nil || !token.Valid {

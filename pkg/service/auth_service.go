@@ -9,9 +9,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// TODO: move to env file, then secure server.
-var JwtKey = []byte("secret_key")
-
 type Claims struct {
 	Username string `json:"username"`
 	ID       int    `json:"id"`
@@ -20,10 +17,11 @@ type Claims struct {
 
 type AuthService struct {
 	userRepo db.UserRepository
+	jwtKey   []byte
 }
 
-func NewAuthService(repo db.UserRepository) *AuthService {
-	return &AuthService{userRepo: repo}
+func NewAuthService(repo db.UserRepository, jwtKey []byte) *AuthService {
+	return &AuthService{userRepo: repo, jwtKey: jwtKey}
 }
 
 func (s *AuthService) Signup(username, password string) (*model.User, error) {
@@ -59,7 +57,7 @@ func (s *AuthService) Login(username, password string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(JwtKey)
+	tokenString, err := token.SignedString(s.jwtKey)
 	if err != nil {
 		return "", err
 	}
