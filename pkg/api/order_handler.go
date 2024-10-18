@@ -38,7 +38,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *OrderHandler) GetOrderItems(w http.ResponseWriter, r *http.Request) {
+func (h *OrderHandler) GetUserOrderItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	orderID, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -52,7 +52,7 @@ func (h *OrderHandler) GetOrderItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orderItems, err := h.orderService.GetOrderItems(orderID, user.ID)
+	orderItems, err := h.orderService.GetUserOrderItems(user.ID, orderID)
 	if err != nil {
 		if err.Error() == "unauthorized access to order items" {
 			http.Error(w, err.Error(), http.StatusUnauthorized)

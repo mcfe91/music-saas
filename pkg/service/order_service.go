@@ -45,15 +45,6 @@ func (s *OrderService) validateProducts(items []*model.OrderItem) error {
 	return nil
 }
 
-func (s *OrderService) GetOrderItems(orderID int, userID int) ([]*model.OrderItem, error) {
-	order, err := s.orderRepo.GetOrderByOrderID(orderID)
-	if err != nil {
-		return nil, err
-	}
-
-	if order.UserID != userID {
-		return nil, fmt.Errorf("unauthorized access to order items")
-	}
-
-	return s.orderRepo.GetOrderItems(orderID)
+func (s *OrderService) GetUserOrderItems(userID, orderID int) ([]*model.OrderItemWithProduct, error) {
+	return s.orderRepo.GetUserOrderItems(userID, orderID)
 }

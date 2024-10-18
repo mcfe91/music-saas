@@ -84,7 +84,7 @@ func main() {
 	protectedRouter.HandleFunc("/cart", cartAPI.AddToCart).Methods("POST")
 	protectedRouter.HandleFunc("/cart", cartAPI.RemoveFromCart).Methods("DELETE")
 	protectedRouter.HandleFunc("/orders", orderAPI.CreateOrder).Methods("POST")
-	protectedRouter.HandleFunc("/orders/{id}/items", orderAPI.GetOrderItems).Methods("GET")
+	protectedRouter.HandleFunc("/orders/{id}", orderAPI.GetUserOrderItems).Methods("GET")
 
 	// Admin routes
 	adminRouter := r.PathPrefix("/api/admin").Subrouter()
