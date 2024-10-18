@@ -117,3 +117,26 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(products)
 }
+
+func (h *ProductHandler) SearchProducts(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("query")
+
+	// Parse limit and offset from query params
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil || limit <= 0 {
+		limit = 10 // Default limit
+	}
+
+	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+	if err != nil || offset < 0 {
+		offset = 0 // Default offset
+	}
+
+	products, err := h.productService.SearchProducts(query, limit, offset)
+	if err != nil {
+		http.Error(w, "Failed to retrieve products", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(products)
+}

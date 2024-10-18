@@ -32,3 +32,7 @@ func (s *ProductService) DeleteProduct(id int) error {
 func (s *ProductService) GetProducts(limit, offset int) ([]*model.Product, error) {
 	return s.productRepo.GetProducts(limit, offset)
 }
+
+func (s *ProductService) SearchProducts(query string, limit, offset int) ([]*model.Product, error) {
+	return s.productRepo.SearchProducts(query, limit, offset)
+}

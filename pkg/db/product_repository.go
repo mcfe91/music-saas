@@ -78,3 +78,25 @@ func (repo *PostgresProductRepository) GetProducts(limit, offset int) ([]*model.
 
 	return products, nil
 }
+
+func (repo *PostgresProductRepository) SearchProducts(query string, limit, offset int) ([]*model.Product, error) {
+	rows, err := repo.db.QueryContext(context.Background(),
+		"SELECT id, name, description, price, created_at FROM products WHERE name ILIKE $1 ORDER BY id LIMIT $2 OFFSET $3",
+		"%"+query+"%", limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []*model.Product
+	for rows.Next() {
+		var product model.Product
+		err := rows.Scan(&product.ID, &product.Name, &product.Description, &product.Price, &product.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, &product)
+	}
+
+	return products, nil
+}

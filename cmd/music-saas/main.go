@@ -70,7 +70,8 @@ func main() {
 	// Public routes
 	r.HandleFunc("/signup", authAPI.Signup).Methods("POST")
 	r.HandleFunc("/login", authAPI.Login).Methods("POST")
-	r.HandleFunc("/products/{id}", productAPI.GetProduct).Methods("GET")
+	r.HandleFunc("/products/search", productAPI.SearchProducts).Methods("GET")
+	r.HandleFunc("/products/{id:[0-9]+}", productAPI.GetProduct).Methods("GET")
 	r.HandleFunc("/products", productAPI.GetProducts).Methods("GET")
 
 	// Protected routes
@@ -85,8 +86,8 @@ func main() {
 	adminRouter.Use(middleware.AuthMiddleware(authService, jwtKey))
 	adminRouter.Use(middleware.AdminMiddleware)
 	adminRouter.HandleFunc("/products", productAPI.CreateProduct).Methods("POST")
-	adminRouter.HandleFunc("/products/{id}", productAPI.UpdateProduct).Methods("PUT")
-	adminRouter.HandleFunc("/products/{id}", productAPI.DeleteProduct).Methods("DELETE")
+	adminRouter.HandleFunc("/products/{id:[0-9]+}", productAPI.UpdateProduct).Methods("PUT")
+	adminRouter.HandleFunc("/products/{id:[0-9]+}", productAPI.DeleteProduct).Methods("DELETE")
 
 	// Start the server
 	log.Println("Server starting on :8080")
