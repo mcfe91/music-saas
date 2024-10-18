@@ -1,0 +1,5 @@
+TODO:
+Clean up error handling
+Add unit tests
+Add integration tests
+Add functional tests
