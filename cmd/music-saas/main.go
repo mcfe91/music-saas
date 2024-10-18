@@ -51,18 +51,21 @@ func main() {
 	productRepo := db.NewPostgresProductRepository(dbConn)
 	cartRepo := db.NewPostgresCartRepository(dbConn)
 	cartItemRepo := db.NewPostgresCartItemRepository(dbConn)
+	orderRepo := db.NewPostgresOrderRepository(dbConn)
 
 	// Services
 	authService := service.NewAuthService(userRepo, jwtKey)
 	profileService := service.NewProfileService(userRepo)
 	productService := service.NewProductService(productRepo)
 	cartService := service.NewCartService(cartRepo, cartItemRepo)
+	orderService := service.NewOrderService(orderRepo, productRepo)
 
 	// API Handlers
 	authAPI := api.NewAuthAPI(authService)
 	productAPI := api.NewProductHandler(productService)
 	profileAPI := api.NewProfileHandler(profileService)
 	cartAPI := api.NewCartHandler(cartService)
+	orderAPI := api.NewOrderHandler(orderService)
 
 	// Router setup using Gorilla mux
 	r := mux.NewRouter()
@@ -80,6 +83,8 @@ func main() {
 	protectedRouter.HandleFunc("/profile", profileAPI.GetProfile).Methods("GET")
 	protectedRouter.HandleFunc("/cart", cartAPI.AddToCart).Methods("POST")
 	protectedRouter.HandleFunc("/cart", cartAPI.RemoveFromCart).Methods("DELETE")
+	protectedRouter.HandleFunc("/orders", orderAPI.CreateOrder).Methods("POST")
+	protectedRouter.HandleFunc("/orders/{id}/items", orderAPI.GetOrderItems).Methods("GET")
 
 	// Admin routes
 	adminRouter := r.PathPrefix("/api/admin").Subrouter()

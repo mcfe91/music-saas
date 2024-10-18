@@ -34,6 +34,7 @@ func (s *AuthService) Signup(username, password string) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	// TODO: User doesn't return correct id from db, fix or just remove...
 	return user, nil
 }
 
